@@ -13,17 +13,21 @@
 <!-- <file-loading-directive></file-loading-directive> -->
 <breadcrumbs-directive></breadcrumbs-directive>
 
-<div class="mdl-grid">	
-	<div class="mdl-cell mdl-cell--4-col" ng-class="{ active: isSet(1) }">
+<div class="mdl-grid">
+	<div class="mdl-cell mdl-cell--3-col" ng-class="{ active: isSet(1) }">
 		<a id="storylines-button" href class="btn btn:hover" ng-click="setTab(1)"> View Storylines </a>
 	</div>
-	<div class="mdl-cell mdl-cell--4-col" ng-class="{ active: isSet(2) }">
+	<div class="mdl-cell mdl-cell--3-col" ng-class="{ active: isSet(2) }">
 		<a id="relations-button" href class="btn btn:hover" ng-click="setTab(2)"> View Relations </a>
 	</div>
-	<div class="mdl-cell mdl-cell--4-col" ng-class="{ active: isSet(3) }">
+	<div class="mdl-cell mdl-cell--3-col" ng-class="{ active: isSet(3) }">
 		<a id="perspectives-button" href class="btn btn:hover" ng-click="setTab(3)"> View Perspectives </a>
+	</div>
+	<div class="mdl-cell mdl-cell--3-col" ng-class="{ active: isSet(4) }">
+		<a id="fdg-button" href class="btn btn:hover" ng-click="setTab(4)"> View FDG (experimental) </a>
 	</div>
 </div>
 <div ng-show="isSet(1)"><view-storylines-directive></view-storylines-directive></div>
 <div ng-show="isSet(2)"><view-relations-directive></view-relations-directive></div>
 <div ng-show="isSet(3)"><view-perspectives-directive></view-perspectives-directive></div>
+<div ng-show="isSet(4)"><view-force-directed-graph-directive></view-force-directed-graph-directive></div>

@@ -16,7 +16,6 @@
   angular.module('uncertApp.colorbrewer', [])
     .constant('colorbrewer', colorbrewer);
 
-
   /**
    * @ngdoc overview
    * @name uncertApp
@@ -30,6 +29,7 @@
       'ngAnimate',
       'ngSanitize',
       'ngTouch',
+      'ngRoute',
       'ui.bootstrap',
 
       'uncertApp.selector',
@@ -37,9 +37,9 @@
       'uncertApp.viewstorylines',
       'uncertApp.viewrelations',
       'uncertApp.viewperspectives',
+      'uncertApp.viewforcedirectedgraph',
 
       'uncertApp.fileLoading',
-      // 'uncertApp.punchcard',
       'uncertApp.breadcrumbs',
       'uncertApp.allactorchart',
       'uncertApp.subwaychart',
@@ -56,7 +56,9 @@
       'uncertApp.allcitationschart',
       'uncertApp.allauthorschart',
       'uncertApp.perspectivelanechart',
-      'uncertApp.perspectivefilters'
+      'uncertApp.perspectivefilters',
+
+      'uncertApp.forcedirectedgraph'
     ])
     .config(function($compileProvider) {
        // data urls are not allowed by default, so whitelist them
@@ -70,15 +72,15 @@
 
 
   angular.module('uncertApp.templates', []);
-  angular.module('uncertApp.utils', ['uncertApp.templates']);
 
+  angular.module('uncertApp.utils', ['uncertApp.templates']);
   angular.module('uncertApp.ndx', ['uncertApp.crossfilter','uncertApp.utils']);
 
   angular.module('uncertApp.selector', ['uncertApp.utils']);
-
   angular.module('uncertApp.viewstorylines', []);
   angular.module('uncertApp.viewrelations', []);
   angular.module('uncertApp.viewperspectives', []);
+  angular.module('uncertApp.viewforcedirectedgraph', []);
 
   angular.module('uncertApp.allactorchart', ['uncertApp.core','uncertApp.utils', 'uncertApp.d3', 'uncertApp.dc', 'uncertApp.ndx']);
   angular.module('uncertApp.subwaychart', ['uncertApp.core','uncertApp.utils', 'uncertApp.d3', 'uncertApp.dc', 'uncertApp.ndx']);
@@ -98,8 +100,9 @@
   angular.module('uncertApp.perspectivelanechart', ['uncertApp.core','uncertApp.utils', 'uncertApp.d3', 'uncertApp.dc', 'uncertApp.colorbrewer', 'uncertApp.ndx']);
   angular.module('uncertApp.perspectivefilters', ['uncertApp.core','uncertApp.utils', 'uncertApp.d3', 'uncertApp.dc', 'uncertApp.colorbrewer', 'uncertApp.ndx']);
 
+  angular.module('uncertApp.forcedirectedgraph', ['uncertApp.core','uncertApp.utils', 'uncertApp.d3', 'uncertApp.dc', 'uncertApp.ndx']);
+  
   angular.module('uncertApp.core', ['uncertApp.utils', 'toastr', 'uncertApp.ndx']);
   angular.module('uncertApp.fileLoading', ['uncertApp.core','uncertApp.utils']);
-  // angular.module('uncertApp.punchcard', ['uncertApp.core','uncertApp.utils', 'uncertApp.d3', 'uncertApp.dc', 'uncertApp.crossfilter', 'uncertApp.colorbrewer']);
   angular.module('uncertApp.breadcrumbs', ['uncertApp.core', 'uncertApp.dc', 'uncertApp.utils']);
 })();

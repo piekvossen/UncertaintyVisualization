@@ -21,24 +21,18 @@
       var myEl2 = angular.element( document.querySelector( '#relations-button' ) );
       myEl2.removeClass(c1);
       myEl2.addClass(c2);
-      var myEl2 = angular.element( document.querySelector( '#perspectives-button' ) );
-      myEl2.removeClass(c1);
-      myEl2.addClass(c2);
-
-      if (newTab === 2) {
-        Messagebus.publish('changingToWrangler');
-      }
+      var myEl3 = angular.element( document.querySelector( '#perspectives-button' ) );
+      myEl3.removeClass(c1);
+      myEl3.addClass(c2);
+      var myEl4 = angular.element( document.querySelector( '#fdg-button' ) );
+      myEl4.removeClass(c1);
+      myEl4.addClass(c2);
     };
 
     $scope.isSet = function(tabNum){
       return $scope.tab === tabNum;
     };
 
-    // Messagebus.subscribe('changingToWrangler',function(event) {
-    //   $scope.setTab(2)
-    // }.bind(this));
-
   }
-  angular.module('uncertApp.selector')
-    .controller('SelectorController', SelectorController);
+  angular.module('uncertApp.selector').controller('SelectorController', SelectorController);
 })();

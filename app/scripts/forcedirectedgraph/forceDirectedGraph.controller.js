@@ -1,26 +1,56 @@
 (function() {
   'use strict';
 
-  function SubwayChartController($scope, $window, $element, d3, dc, NdxService, colorbrewer, HelperFunctions, Messagebus) {
-    // var mentionToTxt = function(d) {
-    //   var raw = d.mentions;
-    //
-    //   var txt = '';
-    //   raw.forEach(function(mention) {
-    //     var pre = mention.snippet[0].substring(0, mention.snippet_char[0]);
-    //     var word = mention.snippet[0].substring(mention.snippet_char[0],mention.snippet_char[1]);
-    //     var post = mention.snippet[0].substring(mention.snippet_char[1], mention.snippet[0].length);
-    //
-    //     txt += pre + word + post + '\n';
-    //   }.bind(this));
-    //
-    //   return txt;
-    // }.bind(this);
+  function ForceDirectedGraphController($scope, $window, $element, d3, dc, NdxService, colorbrewer, HelperFunctions, Messagebus) {
+    this.sources = {};
+    var findMine = function(sources, uri) {
+      var result;
+      sources.forEach(function(source) {
+        if (source.uri.localeCompare(uri) === 0) {
+          result = source;
+        }
+      });
+      return result;
+    };
+
+    var mentionToTxt = function(d, sources) {
+      var result = [];
+      var raw = d.mentions;
+      raw.forEach(function(mention) {
+        var uri = mention.uri[0];
+        if (mention.uri[1] !== undefined) {
+          console.log('unparsed mention here');
+        }
+        var charStart = parseInt(mention.char[0]);
+        var charEnd = parseInt(mention.char[1]);
+
+        var found = findMine(this.sources, uri);
+
+        // var meta = raw[i+1].split('=');
+        // var sentence = meta[meta.length-1];
+        if (found) {
+          result.push({
+            charStart: charStart,
+            charEnd: charEnd,
+            text: found.text
+          });
+        }
+      }.bind(this));
+      var txt = '';
+      result.forEach(function(phrase) {
+        var pre = phrase.text.substring(phrase.charStart - 30, phrase.charStart);
+        var word = phrase.text.substring(phrase.charStart, phrase.charEnd);
+        var post = phrase.text.substring(phrase.charEnd, phrase.charEnd + 30);
+
+        txt += pre + word + post + '\n';
+      });
+      return txt;
+    }.bind(this);
 
     this.initializeChart = function() {
-      var subwayChart = dc.subwayChart('#'+$element[0].children[0].attributes.id.value);
+      var forceDirectedGraph = dc.forceDirectedGraph('#'+$element[0].children[0].attributes.id.value);
 
-      //The dimension for the subwayChart. We use time for x and group for y,
+      //The dimension for the forceDirectedGraph. We use time for x and group for y,
       //and bin everything in the same group number and day.
       var subwayDimension = NdxService.buildDimension(function(d) {
         var time = d3.time.format('%Y%m%d').parse(d.time);
@@ -92,22 +122,22 @@
 
 
       //Set up the
-      subwayChart
+      forceDirectedGraph
       //Sizes in pixels
-        .width($window.innerWidth * (8/12) * (10/12) - 32 - 8)//parseInt($element[0].getClientRects()[1].width, 10))
-        .height(1000)
+        .width($window.innerWidth - 8)
+        .height(400)
         .margins({
-          top: 10,
+          top: 0,
           right: 0,
-          bottom: 20,
-          left: 150
+          bottom: 0,
+          left: 0
         })
 
       //Bind data
       .dimension(subwayDimension)
         .group(subwayGroup)
 
-      .filterHandler(HelperFunctions.customDefaultFilterHandler.bind(subwayChart))
+      .filterHandler(HelperFunctions.customDefaultFilterHandler.bind(forceDirectedGraph))
 
       //The time this chart takes to do its animations.
       .transitionDuration(1500)
@@ -143,12 +173,6 @@
         })
         .minRadius(5)
         .maxBubbleRelativeSize(0.015)
-
-      //Use the color scheme of the groupRowChart
-      .colors(d3.scale.ordinal().range(HelperFunctions.getOrdinalColors()))
-      .colorAccessor(function(d) {
-        return d;
-      })
 
       //Labels printed just above the bubbles
       .renderLabel(true)
@@ -188,56 +212,56 @@
             '\n---Labels-------\n' +
             labelString +
             '\n---Mentions-----\n' +
-            HelperFunctions.mentionToTxt(p.value);
+            mentionToTxt(p.value, this.sources);
           return titleString;
         }.bind(this));
 
       //A hack to make the customBubbleChart filter out 0-value bubbles while determining the x-axis range
-      dc.override(subwayChart, 'xAxisMin', function() {
-        var min = d3.min(subwayChart.data(), function(e) {
-          if (subwayChart.radiusValueAccessor()(e) > 0) {
-            return subwayChart.keyAccessor()(e);
+      dc.override(forceDirectedGraph, 'xAxisMin', function() {
+        var min = d3.min(forceDirectedGraph.data(), function(e) {
+          if (forceDirectedGraph.radiusValueAccessor()(e) > 0) {
+            return forceDirectedGraph.keyAccessor()(e);
           }
         });
-        return dc.utils.subtract(min, subwayChart.xAxisPadding());
+        return dc.utils.subtract(min, forceDirectedGraph.xAxisPadding());
       });
 
-      dc.override(subwayChart, 'xAxisMax', function() {
-        var max = d3.max(subwayChart.data(), function(e) {
-          if (subwayChart.radiusValueAccessor()(e) > 0) {
-            return subwayChart.keyAccessor()(e);
+      dc.override(forceDirectedGraph, 'xAxisMax', function() {
+        var max = d3.max(forceDirectedGraph.data(), function(e) {
+          if (forceDirectedGraph.radiusValueAccessor()(e) > 0) {
+            return forceDirectedGraph.keyAccessor()(e);
           }
         });
-        return dc.utils.add(max, subwayChart.xAxisPadding());
+        return dc.utils.add(max, forceDirectedGraph.xAxisPadding());
       });
 
       //A hack to make the bubbleChart accept ordinal values on the y Axis
-      dc.override(subwayChart, '_prepareYAxis', function(g) {
+      dc.override(forceDirectedGraph, '_prepareYAxis', function(g) {
         this.__prepareYAxis(g);
         this.y().rangeBands([this.yAxisHeight(), 0], 0, 1);
       });
 
-      dc.override(subwayChart, 'fadeDeselectedArea', function() {
-        if (subwayChart.hasFilter()) {
-          subwayChart.selectAll('g.' + subwayChart.BUBBLE_NODE_CLASS).each(function(d) {
-            if (subwayChart.isSelectedNode(d)) {
-              subwayChart.highlightSelected(this);
+      dc.override(forceDirectedGraph, 'fadeDeselectedArea', function() {
+        if (forceDirectedGraph.hasFilter()) {
+          forceDirectedGraph.selectAll('g.' + forceDirectedGraph.BUBBLE_NODE_CLASS).each(function(d) {
+            if (forceDirectedGraph.isSelectedNode(d)) {
+              forceDirectedGraph.highlightSelected(this);
             } else {
-              subwayChart.fadeDeselected(this);
+              forceDirectedGraph.fadeDeselected(this);
             }
           });
         } else {
-          subwayChart.selectAll('g.' + subwayChart.BUBBLE_NODE_CLASS).each(function() {
-            subwayChart.resetHighlight(this);
+          forceDirectedGraph.selectAll('g.' + forceDirectedGraph.BUBBLE_NODE_CLASS).each(function() {
+            forceDirectedGraph.resetHighlight(this);
           });
         }
       });
 
       //Disable the onClick handler for this chart
-      dc.override(subwayChart, 'onClick', function() {
+      dc.override(forceDirectedGraph, 'onClick', function() {
       });
 
-      subwayChart.render();
+      forceDirectedGraph.render();
     };
 
     Messagebus.subscribe('crossfilter ready', function() {
@@ -245,5 +269,5 @@
     }.bind(this));
   }
 
-  angular.module('uncertApp.subwaychart').controller('SubwayChartController', SubwayChartController);
+  angular.module('uncertApp.forcedirectedgraph').controller('ForceDirectedGraphController', ForceDirectedGraphController);
 })();
